@@ -35,3 +35,15 @@ func (r *CarPostgres) Create(ctx context.Context, car models.Car) (int, error) {
 	}
 	return newID, nil
 }
+
+func (r *CarPostgres) Delete(ctx context.Context, id int) error {
+	query := `DELETE FROM cars WHERE id = $1`
+	commandTag, err := r.db.Exec(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	if commandTag.RowsAffected() == 0 {
+		return errors.New("car not found")
+	}
+	return nil
+}
