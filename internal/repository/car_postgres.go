@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/MitrofanK/Test-Menti/internal/models"
 )
@@ -31,7 +32,7 @@ func (r *CarPostgres) Create(ctx context.Context, car models.Car) (int, error) {
 	var newID int
 	err := row.Scan(&newID)
 	if err != nil {
-		return 0, err 
+		return 0, err
 	}
 	return newID, nil
 }
@@ -54,8 +55,39 @@ func (r *CarPostgres) GetByID(ctx context.Context, id int) (models.Car, error) {
 		return models.Car{}, err
 	}
 	return car, nil
-
 }
+
+func (r *CarPostgres) GetAll(ctx context.Context) ([]models.Car, error) {
+	query := `SELECT id, mark, model, owner_count, price, currency, options 
+			  FROM cars`
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	cars := make([]models.Car, 0)
+	for rows.Next() {
+		var car models.Car
+		err := rows.Scan(
+			&car.ID,
+			&car.Mark,
+			&car.Model,
+			&car.OwnerCount,
+			&car.Price,
+			&car.Currency,
+			&car.Options,
+		)
+		if err != nil {
+			return nil, err
+		}
+		cars = append(cars, car)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return cars, nil
+}
+
 func (r *CarPostgres) Delete(ctx context.Context, id int) error {
 	query := `DELETE FROM cars WHERE id = $1`
 	commandTag, err := r.db.Exec(ctx, query, id)
