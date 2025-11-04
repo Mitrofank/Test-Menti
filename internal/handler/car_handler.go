@@ -60,3 +60,12 @@ func (h *CarHandler) GetByID(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, car)
 }
+
+func (h *CarHandler) GetAll(c *gin.Context) {
+	cars, err := h.service.GetAll(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, cars)
+}
