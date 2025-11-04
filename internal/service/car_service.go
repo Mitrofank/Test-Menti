@@ -2,24 +2,26 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/MitrofanK/Test-Menti/internal/models"
+	"github.com/MitrofanK/Test-Menti/internal/repository"
 )
 
 type CarService interface {
-	Create(ctx context.Context, car models.Car) (int, error) 
+	Create(ctx context.Context, car models.Car) (int, error)
 	GetByID(ctx context.Context, id int) (models.Car, error)
 	GetAll(ctx context.Context) ([]models.Car, error)
 	Delete(ctx context.Context, id int) error
 }
 
 type CarServiceImpl struct {
-	repo repository.CarRepository 
+	repo repository.CarRepository
 }
 
 func NewCarService(repo repository.CarRepository) *CarServiceImpl {
 	return &CarServiceImpl{
-		repo: repo
+		repo: repo,
 	}
 }
 

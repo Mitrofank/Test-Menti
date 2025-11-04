@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/MitrofanK/Test-Menti/internal/models"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type CarRepository interface {
@@ -18,9 +19,9 @@ type CarPostgres struct {
 	db *pgxpool.Pool
 }
 
-func NewCarPostgres(db *pgxpool.Pool) *CarRepository {
+func NewCarPostgres(db *pgxpool.Pool) *CarPostgres {
 	return &CarPostgres{
-		db: db
+		db: db,
 	}
 }
 
