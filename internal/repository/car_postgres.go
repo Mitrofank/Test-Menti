@@ -35,7 +35,27 @@ func (r *CarPostgres) Create(ctx context.Context, car models.Car) (int, error) {
 	}
 	return newID, nil
 }
+func (r *CarPostgres) GetByID(ctx context.Context, id int) (models.Car, error) {
+	query := `SELECT id, mark, model, owner_count, price, currency, options 
+			  FROM cars 
+			  WHERE id = $1`
+	row := r.db.QueryRow(ctx, query, id)
+	var car models.Car
+	err := row.Scan(
+		&car.ID,
+		&car.Mark,
+		&car.Model,
+		&car.OwnerCount,
+		&car.Price,
+		&car.Currency,
+		&car.Options,
+	)
+	if err != nil {
+		return models.Car{}, err
+	}
+	return car, nil
 
+}
 func (r *CarPostgres) Delete(ctx context.Context, id int) error {
 	query := `DELETE FROM cars WHERE id = $1`
 	commandTag, err := r.db.Exec(ctx, query, id)
