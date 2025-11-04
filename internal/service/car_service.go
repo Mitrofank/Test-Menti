@@ -39,3 +39,15 @@ func (s *CarServiceImpl) Create(ctx context.Context, car models.Car) (int, error
 	}
 	return id, nil
 }
+
+func (s *CarServiceImpl) GetByID(ctx context.Context, id int) (models.Car, error) {
+	return s.repo.GetByID(ctx, id)
+}
+
+func (s *CarServiceImpl) GetAll(ctx context.Context) ([]models.Car, error) {
+	return s.repo.GetAll(ctx)
+}
+
+func (s *CarServiceImpl) Delete(ctx context.Context, id int) error {
+	return s.repo.Delete(ctx, id)
+}
