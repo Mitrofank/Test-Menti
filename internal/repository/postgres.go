@@ -9,13 +9,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Repository interface {
-	Create(ctx context.Context, car models.Car) (int, error)
-	GetByID(ctx context.Context, id int) (models.Car, error)
-	GetAll(ctx context.Context) ([]models.Car, error)
-	Delete(ctx context.Context, id int) error
-}
-
 type Postgres struct {
 	db *pgxpool.Pool
 }
@@ -33,9 +26,11 @@ func (r *Postgres) Create(ctx context.Context, car models.Car) (int, error) {
 	row := r.db.QueryRow(ctx, query, car.Mark, car.Model, car.OwnerCount, car.Price, car.Currency, car.Options)
 	var newID int
 	err := row.Scan(&newID)
+
 	if err != nil {
-		return 0, fmt.Errorf("ошибка создания машины: %w", err)
+		return 0, fmt.Errorf("error creating car: %w", err)
 	}
+
 	return newID, nil
 }
 func (r *Postgres) GetByID(ctx context.Context, id int) (models.Car, error) {
@@ -53,18 +48,21 @@ func (r *Postgres) GetByID(ctx context.Context, id int) (models.Car, error) {
 		&car.Currency,
 		&car.Options,
 	)
+
 	if err != nil {
-		return models.Car{}, fmt.Errorf("ошибка сканирования машины: %w", err)
+		return models.Car{}, fmt.Errorf("error getting car: %w", err)
 	}
+
 	return car, nil
 }
 
 func (r *Postgres) GetAll(ctx context.Context) ([]models.Car, error) {
 	query := `select id, mark, model, owner_count, price, currency, options 
 			  from cars`
+
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка получения всех машин: %w", err)
+		return nil, fmt.Errorf("error getting all cars: %w", err)
 	}
 	defer rows.Close()
 
@@ -72,7 +70,7 @@ func (r *Postgres) GetAll(ctx context.Context) ([]models.Car, error) {
 
 	for rows.Next() {
 		var car models.Car
-		err := rows.Scan(
+		if err := rows.Scan(
 			&car.ID,
 			&car.Mark,
 			&car.Model,
@@ -80,14 +78,13 @@ func (r *Postgres) GetAll(ctx context.Context) ([]models.Car, error) {
 			&car.Price,
 			&car.Currency,
 			&car.Options,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("ошибка сканирования машины: %w", err)
+		); err != nil {
+			return nil, fmt.Errorf("error scanning car: %w", err)
 		}
 		cars = append(cars, car)
 	}
 
-	if err = rows.Err(); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 	return cars, nil
@@ -97,7 +94,7 @@ func (r *Postgres) Delete(ctx context.Context, id int) error {
 	query := `delete from cars where id = $1`
 	commandTag, err := r.db.Exec(ctx, query, id)
 	if err != nil {
-		return fmt.Errorf("ошибка удаления машины: %w", err)
+		return fmt.Errorf("error deleting car: %w", err)
 	}
 	if commandTag.RowsAffected() == 0 {
 		return errors.New("car not found")
