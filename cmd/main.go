@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/MitrofanK/Test-Menti/internal/api/handler"
+	handler "github.com/MitrofanK/Test-Menti/internal/api/handler/car"
 	"github.com/MitrofanK/Test-Menti/internal/repository"
 	service "github.com/MitrofanK/Test-Menti/internal/service/car"
 	"github.com/gin-gonic/gin"

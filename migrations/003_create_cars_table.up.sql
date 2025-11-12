@@ -6,11 +6,11 @@ CREATE TABLE cars (
     owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     previous_owners_count INTEGER NOT NULL DEFAULT 0,
     currency VARCHAR(3) NOT NULL,
-    options TEXT NOT NULL,
+    price INTEGER NOT NULL CHECK (price > 0),
+    options TEXT[],
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_currency CHECK (currency IN ('RUB', 'USD', 'EUR')),
-    CONSTRAINT chk_options_not_empty CHECK (options <> ''),
     CONSTRAINT chk_previous_owners_count_positive CHECK (previous_owners_count >= 0)
 );
 

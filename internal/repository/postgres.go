@@ -20,10 +20,10 @@ func NewRepository(db *pgxpool.Pool) *Postgres {
 }
 
 func (r *Postgres) Create(ctx context.Context, car models.Car) (int, error) {
-	query := `insert into cars (mark, model, owner_count, price, currency, options) 
-	          values ($1, $2, $3, $4, $5, $6) 
+	query := `insert into cars (id, make, model, year, OwnerID, PreviousOwnersCount, currency, price, options) 
+	          values ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
 	          returning id`
-	row := r.db.QueryRow(ctx, query, car.Mark, car.Model, car.OwnerCount, car.Price, car.Currency, car.Options)
+	row := r.db.QueryRow(ctx, query, car.Make, car.Model, car.Year, car.OwnerID, car.PreviousOwnersCount, car.Currency, car.Price, car.Options)
 	var newID int
 	err := row.Scan(&newID)
 
@@ -34,18 +34,20 @@ func (r *Postgres) Create(ctx context.Context, car models.Car) (int, error) {
 	return newID, nil
 }
 func (r *Postgres) GetByID(ctx context.Context, id int) (models.Car, error) {
-	query := `select id, mark, model, owner_count, price, currency, options 
+	query := `select id, make, model, year, OwnerID, PreviousOwnersCount, currency, price, options 
 			  from cars 
 			  where id = $1`
 	row := r.db.QueryRow(ctx, query, id)
 	var car models.Car
 	err := row.Scan(
 		&car.ID,
-		&car.Mark,
+		&car.Make,
 		&car.Model,
-		&car.OwnerCount,
-		&car.Price,
+		&car.Year,
+		&car.OwnerID,
+		&car.PreviousOwnersCount,
 		&car.Currency,
+		&car.Price,
 		&car.Options,
 	)
 
@@ -57,7 +59,7 @@ func (r *Postgres) GetByID(ctx context.Context, id int) (models.Car, error) {
 }
 
 func (r *Postgres) GetAll(ctx context.Context) ([]models.Car, error) {
-	query := `select id, mark, model, owner_count, price, currency, options 
+	query := `select id, make, model, year, OwnerID, PreviousOwnersCount, currency, price, options 
 			  from cars`
 
 	rows, err := r.db.Query(ctx, query)
@@ -72,11 +74,13 @@ func (r *Postgres) GetAll(ctx context.Context) ([]models.Car, error) {
 		var car models.Car
 		if err := rows.Scan(
 			&car.ID,
-			&car.Mark,
+			&car.Make,
 			&car.Model,
-			&car.OwnerCount,
-			&car.Price,
+			&car.Year,
+			&car.OwnerID,
+			&car.PreviousOwnersCount,
 			&car.Currency,
+			&car.Price,
 			&car.Options,
 		); err != nil {
 			return nil, fmt.Errorf("error scanning car: %w", err)

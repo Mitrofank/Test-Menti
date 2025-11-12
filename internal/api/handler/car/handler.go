@@ -39,7 +39,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	if input.Mark == "" || input.Model == "" {
+	if input.Make == "" || input.Model == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "make and model are required fields"})
 		return
 	}
