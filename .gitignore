@@ -1,3 +1,5 @@
 .env
 test_task.md
 todo
+*.exe
+.dockerignore

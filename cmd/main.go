@@ -4,9 +4,9 @@ import (
 	"context"
 	"os"
 
-	"github.com/MitrofanK/Test-Menti/internal/handler"
+	"github.com/MitrofanK/Test-Menti/internal/api/handler"
 	"github.com/MitrofanK/Test-Menti/internal/repository"
-	"github.com/MitrofanK/Test-Menti/internal/service"
+	service "github.com/MitrofanK/Test-Menti/internal/service/car"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	log "github.com/sirupsen/logrus"
