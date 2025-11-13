@@ -3,4 +3,4 @@ CREATE TABLE roles (
     name VARCHAR(50) UNIQUE NOT NULL
 );
 
-INSERT INTO roles (name) VALUES ('admin'), ('user');
+INSERT INTO roles (id, name) VALUES (1, 'ADMIN'), (2, 'USER');
