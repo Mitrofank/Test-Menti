@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"os"
+	"time"
 
-	handler "github.com/MitrofanK/Test-Menti/internal/api/handler/car"
+	carhandler "github.com/MitrofanK/Test-Menti/internal/api/handler/car"
+	"github.com/MitrofanK/Test-Menti/internal/auth"
 	"github.com/MitrofanK/Test-Menti/internal/repository"
-	service "github.com/MitrofanK/Test-Menti/internal/service/car"
+	carservice "github.com/MitrofanK/Test-Menti/internal/service/car"
+	userservice "github.com/MitrofanK/Test-Menti/internal/service/user"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	log "github.com/sirupsen/logrus"
@@ -31,18 +34,31 @@ func main() {
 
 	log.Info("Successful connection to the database")
 
+	signingKey := "your-secret-key" // тут должно забираться из env
+	tokenTTL := time.Hour * 12
+	tokenManager, err := auth.NewTokenManager(signingKey, tokenTTL)
+
+	if err != nil {
+		log.Fatalf("Error creating token manager: %v\n", err)
+	}
+
 	repo := repository.NewRepository(dbpool)
-	service := service.NewService(repo)
-	handler := handler.NewHandler(service, log.New())
+
+	userService := userservice.NewService(repo, tokenManager)
+	carService := carservice.NewService(repo)
+
+	carHandler := carhandler.NewHandler(carService, log.New())
+
 	router := gin.Default()
+
 	api := router.Group("/api/v1")
 	{
 		cars := api.Group("/cars")
 		{
-			cars.POST("/add", handler.Create)
-			cars.GET("/:id", handler.GetByID)
-			cars.GET("", handler.GetAll)
-			cars.DELETE("/:id", handler.Delete)
+			cars.POST("/add", carHandler.Create)
+			cars.GET("/:id", carHandler.GetByID)
+			cars.GET("", carHandler.GetAll)
+			cars.DELETE("/:id", carHandler.Delete)
 		}
 	}
 
