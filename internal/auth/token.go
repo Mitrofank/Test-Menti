@@ -19,14 +19,14 @@ func NewTokenManager(signingKey string, ttl time.Duration) (*TokenManager, error
 	return &TokenManager{signingKey: signingKey, ttl: ttl}, nil
 }
 
-type tokenClaims struct {
+type TokenClaims struct {
 	jwt.RegisteredClaims
 	UserID int `json:"user_id"`
 	RoleID int `json:"role_id"`
 }
 
 func (tm *TokenManager) GenerateToken(userID int, roleID int) (string, error) {
-	claims := &tokenClaims{
+	claims := &TokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tm.ttl)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

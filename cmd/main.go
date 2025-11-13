@@ -6,6 +6,8 @@ import (
 	"time"
 
 	carhandler "github.com/MitrofanK/Test-Menti/internal/api/handler/car"
+	userhandler "github.com/MitrofanK/Test-Menti/internal/api/handler/user"
+	"github.com/MitrofanK/Test-Menti/internal/api/middleware"
 	"github.com/MitrofanK/Test-Menti/internal/auth"
 	"github.com/MitrofanK/Test-Menti/internal/repository"
 	carservice "github.com/MitrofanK/Test-Menti/internal/service/car"
@@ -34,7 +36,13 @@ func main() {
 
 	log.Info("Successful connection to the database")
 
-	signingKey := "your-secret-key" // тут должно забираться из env
+	signingKey := os.Getenv("SIGNING_KEY")
+	if signingKey == "" {
+		log.Fatal("SIGNING_KEY environment variable is not set")
+	}
+
+	authMiddleware := middleware.NewMiddleware(signingKey)
+
 	tokenTTL := time.Hour * 12
 	tokenManager, err := auth.NewTokenManager(signingKey, tokenTTL)
 
@@ -48,17 +56,28 @@ func main() {
 	carService := carservice.NewService(repo)
 
 	carHandler := carhandler.NewHandler(carService, log.New())
+	userHandler := userhandler.NewHandler(userService, log.New())
 
 	router := gin.Default()
 
 	api := router.Group("/api/v1")
 	{
-		cars := api.Group("/cars")
+		authGroup := api.Group("/auth")
 		{
-			cars.POST("/add", carHandler.Create)
-			cars.GET("/:id", carHandler.GetByID)
-			cars.GET("", carHandler.GetAll)
-			cars.DELETE("/:id", carHandler.Delete)
+			authGroup.POST("/sign-up", userHandler.SignUp)
+			authGroup.POST("/sign-in", userHandler.SignIn)
+		}
+
+		protected := api.Group("/")
+		protected.Use(authMiddleware.UserIdentity)
+		{
+			cars := protected.Group("/cars")
+			{
+				cars.POST("/add", carHandler.Create)
+				cars.GET("/:id", carHandler.GetByID)
+				cars.GET("", carHandler.GetAll)
+				cars.DELETE("/:id", carHandler.Delete)
+			}
 		}
 	}
 
