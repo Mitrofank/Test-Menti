@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	errorsx "github.com/MitrofanK/Test-Menti/internal/errors"
 	"github.com/MitrofanK/Test-Menti/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -31,19 +32,19 @@ func NewService(repo Repository, token Token) *UserService {
 
 func (s *UserService) SignUp(ctx context.Context, email, password string) (int, error) {
 	if _, err := s.repo.GetUserByEmail(ctx, email); err == nil {
-		return 0, fmt.Errorf("user with email '%s' already exists", email)
+		return 0, errorsx.ErrUserExists
 	}
 
 	if password == "" {
-		return 0, fmt.Errorf("the password field cannot be empty")
+		return 0, errorsx.ErrPasBeEmpty
 	}
 
 	if len(password) < 8 || len(password) > 64 {
-		return 0, fmt.Errorf("password must be between 8 and 64 characters long")
+		return 0, errorsx.ErrPasLength
 	}
 
 	if password == email {
-		return 0, fmt.Errorf("login and password must not match")
+		return 0, errorsx.ErrPasAndLoginSame
 	}
 
 	// проверка на состав пороля
@@ -72,11 +73,11 @@ func (s *UserService) SignUp(ctx context.Context, email, password string) (int, 
 func (s *UserService) SignIn(ctx context.Context, email, password string) (string, error) {
 	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
-		return "", fmt.Errorf("incorrect login or password")
+		return "", errorsx.ErrIncorLoginOrPas
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return "", fmt.Errorf("incorrect login or password")
+		return "", errorsx.ErrIncorLoginOrPas
 	}
 
 	token, err := s.token.GenerateToken(user.ID, user.RoleID)
