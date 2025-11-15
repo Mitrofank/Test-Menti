@@ -22,7 +22,7 @@ func NewRepository(db *pgxpool.Pool) *Postgres {
 func (r *Postgres) CreateCar(ctx context.Context, car models.Car) (int, error) {
 	query := `insert into cars (make, model, year, OwnerID, PreviousOwnersCount, currency, price, options) 
 	          values ($1, $2, $3, $4, $5, $6, $7, $8) 
-	          returning id`
+	          returning id;`
 	row := r.db.QueryRow(ctx, query, car.Make, car.Model, car.Year, car.OwnerID, car.PreviousOwnersCount, car.Currency, car.Price, car.Options)
 	var newID int
 	err := row.Scan(&newID)
@@ -36,7 +36,7 @@ func (r *Postgres) CreateCar(ctx context.Context, car models.Car) (int, error) {
 func (r *Postgres) GetByIDCar(ctx context.Context, id int) (models.Car, error) {
 	query := `select id, make, model, year, OwnerID, PreviousOwnersCount, currency, price, options 
 			  from cars 
-			  where id = $1`
+			  where id = $1;`
 	row := r.db.QueryRow(ctx, query, id)
 	var car models.Car
 	err := row.Scan(
@@ -60,7 +60,7 @@ func (r *Postgres) GetByIDCar(ctx context.Context, id int) (models.Car, error) {
 
 func (r *Postgres) GetAllCar(ctx context.Context) ([]models.Car, error) {
 	query := `select id, make, model, year, OwnerID, PreviousOwnersCount, currency, price, options 
-			  from cars`
+			  from cars;`
 
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
@@ -95,7 +95,7 @@ func (r *Postgres) GetAllCar(ctx context.Context) ([]models.Car, error) {
 }
 
 func (r *Postgres) DeleteCar(ctx context.Context, id int) error {
-	query := `delete from cars where id = $1`
+	query := `delete from cars where id = $1;`
 	commandTag, err := r.db.Exec(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("error deleting car: %w", err)
@@ -109,7 +109,7 @@ func (r *Postgres) DeleteCar(ctx context.Context, id int) error {
 func (r *Postgres) CreateUser(ctx context.Context, user models.User) (int, error) {
 	query := `insert into users (email, password_hash, role_id)
 			  values ($1, $2, $3)
-			  returning id`
+			  returning id;`
 
 	row := r.db.QueryRow(ctx, query, user.Email, user.PasswordHash, user.RoleID)
 	var newID int
@@ -125,7 +125,7 @@ func (r *Postgres) CreateUser(ctx context.Context, user models.User) (int, error
 func (r *Postgres) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
 	query := `select id, email, password_hash, role_id 
 			  from users
-			  where email = %1`
+			  where email = $1;`
 	row := r.db.QueryRow(ctx, query, email)
 	var user models.User
 	err := row.Scan(

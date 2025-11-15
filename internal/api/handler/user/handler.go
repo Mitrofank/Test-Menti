@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	errorsx "github.com/MitrofanK/Test-Menti/internal/errors"
+	"github.com/MitrofanK/Test-Menti/internal/errorsx"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -42,18 +42,20 @@ func (h *Handler) SignUp(c *gin.Context) {
 		return
 	}
 
+	if input.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": errorsx.ErrPasBeEmpty})
+		return
+	}
+
+	if len(input.Password) < 8 || len(input.Password) > 64 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": errorsx.ErrPasLength})
+		return
+	}
+
 	id, err := h.userService.SignUp(c.Request.Context(), input.Email, input.Password)
 	if err != nil {
 		if errors.Is(err, errorsx.ErrUserExists) {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
-			return
-		}
-		if errors.Is(err, errorsx.ErrPasBeEmpty) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		if errors.Is(err, errorsx.ErrPasLength) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		if errors.Is(err, errorsx.ErrPasAndLoginSame) {
@@ -85,8 +87,8 @@ func (h *Handler) SignIn(c *gin.Context) {
 			return
 		}
 
-		h.log.Error("login error")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		h.log.Error(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "interanl server error"})
 		return
 	}
 

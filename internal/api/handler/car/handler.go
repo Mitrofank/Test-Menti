@@ -34,8 +34,8 @@ func (h *Handler) Create(c *gin.Context) {
 	var input models.Car
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		h.log.Error("read error from request body")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Errorf("read error from request body: %w", err)})
+		h.log.Warning(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("read error from request body: %w", err)})
 		return
 	}
 
@@ -48,7 +48,7 @@ func (h *Handler) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "the price must be greater than zero"})
 		return
 	}
-
+	// добавить кастомные типы
 	if input.Currency != "RUB" && input.Currency != "USD" && input.Currency != "EUR" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "The currency must be the ruble, US dollar, or euro."})
 		return

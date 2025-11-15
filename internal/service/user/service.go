@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	errorsx "github.com/MitrofanK/Test-Menti/internal/errors"
+	"github.com/MitrofanK/Test-Menti/internal/errorsx"
 	"github.com/MitrofanK/Test-Menti/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -35,21 +35,11 @@ func (s *UserService) SignUp(ctx context.Context, email, password string) (int, 
 		return 0, errorsx.ErrUserExists
 	}
 
-	if password == "" {
-		return 0, errorsx.ErrPasBeEmpty
-	}
-
-	if len(password) < 8 || len(password) > 64 {
-		return 0, errorsx.ErrPasLength
-	}
-
 	if password == email {
 		return 0, errorsx.ErrPasAndLoginSame
 	}
 
 	// проверка на состав пороля
-
-	// проверка по топ-1000 популярных поролей (геморой)
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
