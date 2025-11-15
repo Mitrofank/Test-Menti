@@ -20,7 +20,7 @@ func NewRepository(db *pgxpool.Pool) *Postgres {
 }
 
 func (r *Postgres) CreateCar(ctx context.Context, car models.Car) (int, error) {
-	query := `insert into cars (make, model, year, OwnerID, PreviousOwnersCount, currency, price, options) 
+	query := `insert into cars (make, model, year, owner_id, previous_owners_count, currency, price, options)
 	          values ($1, $2, $3, $4, $5, $6, $7, $8) 
 	          returning id;`
 	row := r.db.QueryRow(ctx, query, car.Make, car.Model, car.Year, car.OwnerID, car.PreviousOwnersCount, car.Currency, car.Price, car.Options)
@@ -33,8 +33,9 @@ func (r *Postgres) CreateCar(ctx context.Context, car models.Car) (int, error) {
 
 	return newID, nil
 }
+
 func (r *Postgres) GetByIDCar(ctx context.Context, id int) (models.Car, error) {
-	query := `select id, make, model, year, OwnerID, PreviousOwnersCount, currency, price, options 
+	query := `select id, make, model, year, owner_id, previous_owners_count, currency, price, options
 			  from cars 
 			  where id = $1;`
 	row := r.db.QueryRow(ctx, query, id)
@@ -59,7 +60,7 @@ func (r *Postgres) GetByIDCar(ctx context.Context, id int) (models.Car, error) {
 }
 
 func (r *Postgres) GetAllCar(ctx context.Context) ([]models.Car, error) {
-	query := `select id, make, model, year, OwnerID, PreviousOwnersCount, currency, price, options 
+	query := `select id, make, model, year, owner_id, previous_owners_count, currency, price, options 
 			  from cars;`
 
 	rows, err := r.db.Query(ctx, query)

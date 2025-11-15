@@ -68,16 +68,17 @@ func main() {
 			authGroup.POST("/sign-in", userHandler.SignIn)
 		}
 
-		cars := api.Group("/cars")
-
-		cars.GET("", carHandler.GetAll)
-		cars.GET("/:id", carHandler.GetByID)
-
-		carsProtected := cars.Group("/")
-		carsProtected.Use(authMiddleware.UserIdentity)
+		publicCars := api.Group("/cars")
 		{
-			cars.POST("/add", carHandler.Create)
-			cars.DELETE("/:id", carHandler.Delete)
+			publicCars.GET("", carHandler.GetAll)
+			publicCars.GET("/:id", carHandler.GetByID)
+		}
+
+		privateCars := api.Group("/cars")
+		privateCars.Use(authMiddleware.UserIdentity)
+		{
+			privateCars.POST("/add", carHandler.Create)
+			privateCars.DELETE("/:id", carHandler.Delete)
 		}
 	}
 
