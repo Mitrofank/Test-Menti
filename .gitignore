@@ -3,3 +3,5 @@ test_task.md
 todo
 *.exe
 .dockerignore
+docker-compose.yml
+Dockerfile

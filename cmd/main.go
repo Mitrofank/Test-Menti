@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"os"
-	"time"
 
 	carhandler "github.com/MitrofanK/Test-Menti/internal/api/handler/car"
 	userhandler "github.com/MitrofanK/Test-Menti/internal/api/handler/user"
 	"github.com/MitrofanK/Test-Menti/internal/api/middleware"
 	"github.com/MitrofanK/Test-Menti/internal/auth"
+	"github.com/MitrofanK/Test-Menti/internal/config"
 	"github.com/MitrofanK/Test-Menti/internal/repository"
 	carservice "github.com/MitrofanK/Test-Menti/internal/service/car"
 	userservice "github.com/MitrofanK/Test-Menti/internal/service/user"
@@ -18,12 +17,13 @@ import (
 )
 
 func main() {
-	databaseUrl := os.Getenv("DATABASE_URL")
-	if databaseUrl == "" {
-		log.Fatal("Environment variable DATABASE_URL is not set")
+	cfg, err := config.LoadConfig()
+
+	if err != nil {
+		log.Fatalf("failed to load configuration: %v", err)
 	}
 
-	dbpool, err := pgxpool.New(context.Background(), databaseUrl)
+	dbpool, err := pgxpool.New(context.Background(), cfg.Postgres.URL)
 	if err != nil {
 		log.Fatalf("Not able to connect to database: %v\n", err)
 	}
@@ -36,15 +36,9 @@ func main() {
 
 	log.Info("Successful connection to the database")
 
-	signingKey := os.Getenv("SIGNING_KEY")
-	if signingKey == "" {
-		log.Fatal("SIGNING_KEY environment variable is not set")
-	}
+	authMiddleware := middleware.NewMiddleware(cfg.JWT.SigningKey)
 
-	authMiddleware := middleware.NewMiddleware(signingKey)
-
-	tokenTTL := time.Hour * 12
-	tokenManager, err := auth.NewTokenManager(signingKey, tokenTTL)
+	tokenManager, err := auth.NewTokenManager(cfg.JWT.SigningKey, cfg.JWT.TokenTTL)
 
 	if err != nil {
 		log.Fatalf("Error creating token manager: %v\n", err)
