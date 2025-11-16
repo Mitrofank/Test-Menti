@@ -9,8 +9,6 @@ github.com/cloudwego/base64x v0.1.6/go.mod h1:OFcloc187FXDaYHvrNIjxSe8ncn0OOM8gE
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/fatih/structs v1.1.0 h1:Q7juDM0QtcnhCpeyLGQKyg4TOIghuNXrkL32pHAUMxo=
-github.com/fatih/structs v1.1.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
 github.com/fsnotify/fsnotify v1.9.0 h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k=
 github.com/fsnotify/fsnotify v1.9.0/go.mod h1:8jBTzvmWwFyi3Pb8djgCCO5IBqzKJ/Jwo8TRcHyHii0=
 github.com/gabriel-vasile/mimetype v1.4.11 h1:AQvxbp830wPhHTqc1u7nzoLT+ZFxGY7emj5DR5DYFik=
@@ -60,8 +58,6 @@ github.com/knadh/koanf/providers/env v1.1.0 h1:U2VXPY0f+CsNDkvdsG8GcsnK4ah85WwWy
 github.com/knadh/koanf/providers/env v1.1.0/go.mod h1:QhHHHZ87h9JxJAn2czdEl6pdkNnDh/JS1Vtsyt65hTY=
 github.com/knadh/koanf/providers/file v1.2.0 h1:hrUJ6Y9YOA49aNu/RSYzOTFlqzXSCpmYIDXI7OJU6+U=
 github.com/knadh/koanf/providers/file v1.2.0/go.mod h1:bp1PM5f83Q+TOUu10J/0ApLBd9uIzg+n9UgthfY+nRA=
-github.com/knadh/koanf/providers/structs v1.0.0 h1:DznjB7NQykhqCar2LvNug3MuxEQsZ5KvfgMbio+23u4=
-github.com/knadh/koanf/providers/structs v1.0.0/go.mod h1:kjo5TFtgpaZORlpoJqcbeLowM2cINodv8kX+oFAeQ1w=
 github.com/knadh/koanf/v2 v2.3.0 h1:Qg076dDRFHvqnKG97ZEsi9TAg2/nFTa9hCdcSa1lvlM=
 github.com/knadh/koanf/v2 v2.3.0/go.mod h1:gRb40VRAbd4iJMYYD5IxZ6hfuopFcXBpc9bbQpZwo28=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=

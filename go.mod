@@ -6,6 +6,10 @@ require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/jackc/pgx/v5 v5.7.6
+	github.com/knadh/koanf/parsers/dotenv v1.1.1
+	github.com/knadh/koanf/providers/env v1.1.0
+	github.com/knadh/koanf/providers/file v1.2.0
+	github.com/knadh/koanf/v2 v2.3.0
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/crypto v0.43.0
 )
@@ -15,7 +19,6 @@ require (
 	github.com/bytedance/sonic v1.14.2 // indirect
 	github.com/bytedance/sonic/loader v0.4.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
-	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.11 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
@@ -32,11 +35,6 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/knadh/koanf/maps v0.1.2 // indirect
-	github.com/knadh/koanf/parsers/dotenv v1.1.1 // indirect
-	github.com/knadh/koanf/providers/env v1.1.0 // indirect
-	github.com/knadh/koanf/providers/file v1.2.0 // indirect
-	github.com/knadh/koanf/providers/structs v1.0.0 // indirect
-	github.com/knadh/koanf/v2 v2.3.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
