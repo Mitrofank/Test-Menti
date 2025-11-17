@@ -2,7 +2,6 @@
 .github
 
 *.exe
-car-api
 
 .vscode/
 .idea/

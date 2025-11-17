@@ -105,7 +105,7 @@ func (h *Handler) GetByIDCar(c *gin.Context) {
 		}
 
 		h.log.Errorf("error getting car with conversion: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "internal server error"})
 		return
 	}
 	c.JSON(http.StatusOK, car)

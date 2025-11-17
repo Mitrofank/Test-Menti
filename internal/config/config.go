@@ -54,7 +54,7 @@ func LoadConfig() (*Config, error) {
 
 	callback := func(s string) string {
 		return strings.Replace(strings.ToLower(
-			strings.TrimPrefix(s, "APP_")), "_", ".", -1)
+			strings.TrimPrefix(s, "APP_")), "_", ".", 1)
 	}
 
 	if err := k.Load(env.Provider("APP_", ".", callback), nil); err != nil {
