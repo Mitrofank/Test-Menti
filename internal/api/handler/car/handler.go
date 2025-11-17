@@ -42,6 +42,11 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
+	if !models.IsSupported(string(input.Currency)) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "type read error"})
+		return
+	}
+
 	if input.Make == "" || input.Model == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "make and model are required fields"})
 		return
@@ -49,11 +54,6 @@ func (h *Handler) Create(c *gin.Context) {
 
 	if input.Price <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "the price must be greater than zero"})
-		return
-	}
-	// добавить кастомные типы
-	if input.Currency != "RUB" && input.Currency != "USD" && input.Currency != "EUR" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "The currency must be the ruble, US dollar, or euro."})
 		return
 	}
 

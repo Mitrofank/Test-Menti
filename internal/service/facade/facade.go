@@ -36,10 +36,10 @@ func (s *Service) GetCarWithConversion(ctx context.Context, id int, targetCurren
 		return models.Car{}, err
 	}
 
-	if targetCurrency != "" && strings.ToUpper(targetCurrency) != car.Currency {
+	if targetCurrency != "" && models.CurrencyCode(strings.ToUpper(targetCurrency)) != car.Currency {
 		convertedPrice, err := s.currencyService.Convert(
 			ctx,
-			car.Currency,
+			string(car.Currency),
 			targetCurrency,
 			float64(car.Price),
 		)
@@ -48,7 +48,7 @@ func (s *Service) GetCarWithConversion(ctx context.Context, id int, targetCurren
 		}
 
 		car.Price = int(convertedPrice)
-		car.Currency = strings.ToUpper(targetCurrency)
+		car.Currency = models.CurrencyCode(strings.ToUpper(targetCurrency))
 	}
 
 	return car, nil
