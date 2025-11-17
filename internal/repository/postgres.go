@@ -13,7 +13,7 @@ type Postgres struct {
 	db *pgxpool.Pool
 }
 
-func NewRepository(db *pgxpool.Pool) *Postgres {
+func NewPostgresRepository(db *pgxpool.Pool) *Postgres {
 	return &Postgres{
 		db: db,
 	}

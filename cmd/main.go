@@ -44,7 +44,7 @@ func main() {
 		log.Fatalf("Error creating token manager: %v\n", err)
 	}
 
-	repo := repository.NewRepository(dbpool)
+	repo := repository.NewPostgresRepository(dbpool)
 
 	userService := userservice.NewService(repo, tokenManager)
 	carService := carservice.NewService(repo)
