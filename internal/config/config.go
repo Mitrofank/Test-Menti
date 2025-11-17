@@ -17,6 +17,7 @@ type Config struct {
 	Redis    RedisConfig    `koanf:"redis"`
 	HTTP     HTTPConfig     `koanf:"http"`
 	JWT      JWTConfig      `koanf:"jwt"`
+	Currency CurrencyConfig `koanf:"currency"`
 }
 
 type PostgresConfig struct {
@@ -31,6 +32,12 @@ type RedisConfig struct {
 
 type HTTPConfig struct {
 	Port string `koanf:"port"`
+}
+
+type CurrencyConfig struct {
+	URL     string        `koanf:"url"`
+	Timeout time.Duration `koanf:"timeout"`
+	TTL     time.Duration `koanf:"ttl"`
 }
 
 type JWTConfig struct {

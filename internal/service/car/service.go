@@ -24,7 +24,7 @@ func NewService(repo Repository) *CarService {
 	}
 }
 
-func (s *CarService) Create(ctx context.Context, car models.Car) (int, error) {
+func (s *CarService) CreateCar(ctx context.Context, car models.Car) (int, error) {
 	id, err := s.repo.CreateCar(ctx, car)
 	if err != nil {
 		return 0, fmt.Errorf("erorr creating car: %w", err)
@@ -32,14 +32,14 @@ func (s *CarService) Create(ctx context.Context, car models.Car) (int, error) {
 	return id, nil
 }
 
-func (s *CarService) GetByID(ctx context.Context, id int) (models.Car, error) {
+func (s *CarService) GetByIDCar(ctx context.Context, id int) (models.Car, error) {
 	return s.repo.GetByIDCar(ctx, id)
 }
 
-func (s *CarService) GetAll(ctx context.Context) ([]models.Car, error) {
+func (s *CarService) GetAllCar(ctx context.Context) ([]models.Car, error) {
 	return s.repo.GetAllCar(ctx)
 }
 
-func (s *CarService) Delete(ctx context.Context, id int) error {
+func (s *CarService) DeleteCar(ctx context.Context, id int) error {
 	return s.repo.DeleteCar(ctx, id)
 }

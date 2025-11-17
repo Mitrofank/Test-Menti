@@ -7,12 +7,16 @@ import (
 	userhandler "github.com/MitrofanK/Test-Menti/internal/api/handler/user"
 	"github.com/MitrofanK/Test-Menti/internal/api/middleware"
 	"github.com/MitrofanK/Test-Menti/internal/auth"
+	"github.com/MitrofanK/Test-Menti/internal/client"
 	"github.com/MitrofanK/Test-Menti/internal/config"
 	"github.com/MitrofanK/Test-Menti/internal/repository"
 	carservice "github.com/MitrofanK/Test-Menti/internal/service/car"
+	currencyservice "github.com/MitrofanK/Test-Menti/internal/service/currency"
+	facadeservice "github.com/MitrofanK/Test-Menti/internal/service/facade"
 	userservice "github.com/MitrofanK/Test-Menti/internal/service/user"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -34,6 +38,18 @@ func main() {
 		log.Fatalf("Not able to ping database: %v\n", err)
 	}
 
+	redisOpts := &redis.Options{
+		Addr:     cfg.Redis.Host + ":" + cfg.Redis.Port,
+		Password: cfg.Redis.Password,
+		DB:       0,
+	}
+
+	redisClient := redis.NewClient(redisOpts)
+
+	if _, err := redisClient.Ping(context.Background()).Result(); err != nil {
+		log.Fatalf("Not able to connect to Redis: %v\n", err)
+	}
+
 	log.Info("Successful connection to the database")
 
 	authMiddleware := middleware.NewMiddleware(cfg.JWT.SigningKey)
@@ -44,12 +60,16 @@ func main() {
 		log.Fatalf("Error creating token manager: %v\n", err)
 	}
 
-	repo := repository.NewPostgresRepository(dbpool)
+	postgresRepo := repository.NewPostgresRepository(dbpool)
+	redisRepo := repository.NewRedisRepository(redisClient)
+	currencyClient := client.NewClient(cfg.Currency.URL, cfg.Currency.Timeout)
 
-	userService := userservice.NewService(repo, tokenManager)
-	carService := carservice.NewService(repo)
+	userService := userservice.NewService(postgresRepo, tokenManager)
+	carService := carservice.NewService(postgresRepo)
+	currencyService := currencyservice.NewService(currencyClient, redisRepo, cfg.Currency.TTL)
+	facadeService := facadeservice.NewService(carService, currencyService)
 
-	carHandler := carhandler.NewHandler(carService, log.New())
+	carHandler := carhandler.NewHandler(facadeService, log.New())
 	userHandler := userhandler.NewHandler(userService, log.New())
 
 	router := gin.Default()
@@ -64,15 +84,15 @@ func main() {
 
 		publicCars := api.Group("/cars")
 		{
-			publicCars.GET("", carHandler.GetAll)
-			publicCars.GET("/:id", carHandler.GetByID)
+			publicCars.GET("", carHandler.GetAllCar)
+			publicCars.GET("/:id", carHandler.GetByIDCar)
 		}
 
 		privateCars := api.Group("/cars")
 		privateCars.Use(authMiddleware.UserIdentity)
 		{
 			privateCars.POST("/add", carHandler.Create)
-			privateCars.DELETE("/:id", carHandler.Delete)
+			privateCars.DELETE("/:id", carHandler.DeleteCar)
 		}
 	}
 

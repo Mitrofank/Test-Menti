@@ -1,32 +1,35 @@
-package handler
+package car
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/MitrofanK/Test-Menti/internal/errorsx"
 	"github.com/MitrofanK/Test-Menti/internal/models"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	log "github.com/sirupsen/logrus"
 )
 
-type CarService interface {
-	Create(ctx context.Context, car models.Car) (int, error)
-	GetByID(ctx context.Context, id int) (models.Car, error)
-	GetAll(ctx context.Context) ([]models.Car, error)
-	Delete(ctx context.Context, id int) error
+type FacadeService interface {
+	GetCarWithConversion(ctx context.Context, id int, targetCurrency string) (models.Car, error)
+	CreateCar(ctx context.Context, car models.Car) (int, error)
+	GetAllCar(ctx context.Context) ([]models.Car, error)
+	DeleteCar(ctx context.Context, id int) error
 }
 
 type Handler struct {
-	carService CarService
-	log        *log.Logger
+	facade FacadeService
+	log    *log.Logger
 }
 
-func NewHandler(carService CarService, log *log.Logger) *Handler {
+func NewHandler(facade FacadeService, log *log.Logger) *Handler {
 	return &Handler{
-		carService: carService,
-		log:        log,
+		facade: facade,
+		log:    log,
 	}
 }
 
@@ -54,7 +57,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	id, err := h.carService.Create(c.Request.Context(), input)
+	id, err := h.facade.CreateCar(c.Request.Context(), input)
 	if err != nil {
 		h.log.Error("create car error")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Errorf("create car error: %w", err)})
@@ -63,7 +66,7 @@ func (h *Handler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
 
-func (h *Handler) Delete(c *gin.Context) {
+func (h *Handler) DeleteCar(c *gin.Context) {
 	idstr := c.Param("id")
 	id, err := strconv.Atoi(idstr)
 	if err != nil {
@@ -71,7 +74,7 @@ func (h *Handler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.carService.Delete(c.Request.Context(), id); err != nil {
+	if err := h.facade.DeleteCar(c.Request.Context(), id); err != nil {
 		h.log.Error("error deleting car")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Errorf("error deleting car: %w", err)})
 		return
@@ -79,7 +82,7 @@ func (h *Handler) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 
-func (h *Handler) GetByID(c *gin.Context) {
+func (h *Handler) GetByIDCar(c *gin.Context) {
 	idstr := c.Param("id")
 	id, err := strconv.Atoi(idstr)
 	if err != nil {
@@ -87,17 +90,29 @@ func (h *Handler) GetByID(c *gin.Context) {
 		return
 	}
 
-	car, err := h.carService.GetByID(c.Request.Context(), id)
+	targetCurrency := c.Query("currency")
+
+	car, err := h.facade.GetCarWithConversion(c.Request.Context(), id, targetCurrency)
 	if err != nil {
-		h.log.Error("error receiving id")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Errorf("error getting vehicle id: %w", err)})
+		if errors.Is(err, pgx.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "car not found"})
+			return
+		}
+
+		if errors.Is(err, errorsx.ErrCurrencyNotFound) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		h.log.Errorf("error getting car with conversion: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 	c.JSON(http.StatusOK, car)
 }
 
-func (h *Handler) GetAll(c *gin.Context) {
-	cars, err := h.carService.GetAll(c.Request.Context())
+func (h *Handler) GetAllCar(c *gin.Context) {
+	cars, err := h.facade.GetAllCar(c.Request.Context())
 	if err != nil {
 		h.log.Error("error receiving all id")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Errorf("error getting all vehicles: %w", err)})
