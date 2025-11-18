@@ -35,7 +35,7 @@ type signUpInput struct {
 }
 
 type refreshInput struct {
-	RefreshToken string `json:"refresh_token" binding:"required,refresh_token"`
+	RefreshToken string `json:"refresh_token" binding:"required"`
 }
 
 func (h *Handler) SignUp(c *gin.Context) {
