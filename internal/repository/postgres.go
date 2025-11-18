@@ -98,12 +98,15 @@ func (r *Postgres) GetAllCar(ctx context.Context) ([]models.Car, error) {
 func (r *Postgres) DeleteCar(ctx context.Context, id int) error {
 	query := `delete from cars where id = $1;`
 	commandTag, err := r.db.Exec(ctx, query, id)
+
 	if err != nil {
 		return fmt.Errorf("error deleting car: %w", err)
 	}
+
 	if commandTag.RowsAffected() == 0 {
 		return errors.New("car not found")
 	}
+
 	return nil
 }
 
@@ -137,7 +140,7 @@ func (r *Postgres) GetUserByEmail(ctx context.Context, email string) (models.Use
 	)
 
 	if err != nil {
-		return models.User{}, fmt.Errorf("error getting user^ %w", err)
+		return models.User{}, fmt.Errorf("error getting user: %w", err)
 	}
 
 	return user, nil
@@ -179,4 +182,39 @@ func (r *Postgres) GetSession(ctx context.Context, refreshTokenHash string) (mod
 	}
 
 	return session, nil
+}
+
+func (r *Postgres) DeleteSession(ctx context.Context, sessionID int) error {
+	query := `delete from refresh_sessions where id = $1;`
+	commandTag, err := r.db.Exec(ctx, query, sessionID)
+
+	if err != nil {
+		return fmt.Errorf("error deleting session: %w", err)
+	}
+
+	if commandTag.RowsAffected() == 0 {
+		return errors.New("session not found")
+	}
+
+	return nil
+}
+
+func (r *Postgres) GetUserByID(ctx context.Context, id int) (models.User, error) {
+	query := `select id, email, password_hash, role_id 
+			  from users
+			  where id = $1;`
+	row := r.db.QueryRow(ctx, query, id)
+	var user models.User
+	err := row.Scan(
+		&user.ID,
+		&user.Email,
+		&user.PasswordHash,
+		&user.RoleID,
+	)
+
+	if err != nil {
+		return models.User{}, fmt.Errorf("error getting user: %w", err)
+	}
+
+	return user, nil
 }
