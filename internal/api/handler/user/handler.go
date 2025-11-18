@@ -13,7 +13,8 @@ import (
 
 type UserService interface {
 	SignUp(ctx context.Context, email, password string) (int, error)
-	SignIn(ctx context.Context, email, password string) (string, error)
+	SignIn(ctx context.Context, email, password string) (string, string, error)
+	Refresh(ctx context.Context, refreshToken string) (string, string, error)
 }
 
 type Handler struct {
@@ -31,6 +32,10 @@ func NewHandler(userService UserService, log *log.Logger) *Handler {
 type signUpInput struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
+}
+
+type refreshInput struct {
+	RefreshToken string `json:"refresh_token" binding:"required,refresh_token"`
 }
 
 func (h *Handler) SignUp(c *gin.Context) {
@@ -80,7 +85,7 @@ func (h *Handler) SignIn(c *gin.Context) {
 		return
 	}
 
-	token, err := h.userService.SignIn(c.Request.Context(), input.Email, input.Password)
+	accessToken, refreshToken, err := h.userService.SignIn(c.Request.Context(), input.Email, input.Password)
 	if err != nil {
 		if errors.Is(err, errorsx.ErrIncorLoginOrPas) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -92,5 +97,34 @@ func (h *Handler) SignIn(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{"access_token": accessToken, "refresh_token": refreshToken})
+}
+
+func (h *Handler) Refresh(c *gin.Context) {
+	var input refreshInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.log.Error("read error from request body")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Errorf("read error from request body: %w", err)})
+		return
+	}
+
+	newAccessToken, newRefreshToken, err := h.userService.Refresh(c.Request.Context(), input.RefreshToken)
+	if err != nil {
+		if errors.Is(err, errorsx.ErrInvalidRefreshToken) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		if errors.Is(err, errorsx.ErrRefreshTokenExpired) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		h.log.Error(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "interanl server error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"access_token": newAccessToken, "refresh_token": newRefreshToken})
 }

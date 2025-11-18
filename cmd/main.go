@@ -80,6 +80,7 @@ func main() {
 		{
 			authGroup.POST("/sign-up", userHandler.SignUp)
 			authGroup.POST("/sign-in", userHandler.SignIn)
+			authGroup.POST("/refresh", userHandler.Refresh)
 		}
 
 		publicCars := api.Group("/cars")
