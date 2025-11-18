@@ -142,3 +142,41 @@ func (r *Postgres) GetUserByEmail(ctx context.Context, email string) (models.Use
 
 	return user, nil
 }
+
+func (r *Postgres) CreateSession(ctx context.Context, refresh models.RefreshSession) error {
+	query := `insert into refresh_sessions (user_id, refresh_token, user_agent, ip_address, expires_at)
+	          values ($1, $2, $3, $4, $5);`
+	_, err := r.db.Exec(ctx, query, refresh.UserID, refresh.RefreshToken, refresh.UserAgent, refresh.IPAddress, refresh.ExpiresAt)
+
+	if err != nil {
+		return fmt.Errorf("error creating refresh session: %w", err)
+	}
+
+	return nil
+}
+
+func (r *Postgres) GetSession(ctx context.Context, refreshTokenHash string) (models.RefreshSession, error) {
+	query := `SELECT id, user_id, refresh_token, user_agent, ip_address, expires_at, created_at
+	          FROM refresh_sessions 
+	          WHERE refresh_token = $1`
+
+	row := r.db.QueryRow(ctx, query, refreshTokenHash)
+
+	var session models.RefreshSession
+
+	err := row.Scan(
+		&session.ID,
+		&session.UserID,
+		&session.RefreshToken,
+		&session.UserAgent,
+		&session.IPAddress,
+		&session.ExpiresAt,
+		&session.CreatedAt,
+	)
+
+	if err != nil {
+		return models.RefreshSession{}, fmt.Errorf("error getting refresh session: %w", err)
+	}
+
+	return session, nil
+}
